@@ -1,6 +1,9 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
+
+using static SnakeGame.Globals;
 
 namespace SnakeGame
 {
@@ -10,8 +13,10 @@ namespace SnakeGame
     public class SnakeGame : Game
     {
         private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
-        private Snake _snake;
+        private SpriteBatch           _spriteBatch;
+        private Texture2D             _backgroundTexture;
+        private Snake                 _snake;
+        private Apple                 _apple;
 
         public SnakeGame()
         {
@@ -19,11 +24,9 @@ namespace SnakeGame
             Content.RootDirectory = "Content";
 
             _graphics.IsFullScreen = true;
-            _graphics.PreferredBackBufferWidth = 800;
-            _graphics.PreferredBackBufferHeight = 480;
+            _graphics.PreferredBackBufferWidth = Width;
+            _graphics.PreferredBackBufferHeight = Height;
             _graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
-
-            _snake = new Snake(0, 0);
         }
 
         /// <summary>
@@ -34,8 +37,7 @@ namespace SnakeGame
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
+            ResetGame();
             base.Initialize();
         }
 
@@ -45,11 +47,7 @@ namespace SnakeGame
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _snake.SetTexture(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -58,7 +56,7 @@ namespace SnakeGame
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+
         }
 
         /// <summary>
@@ -68,11 +66,21 @@ namespace SnakeGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                Exit();
+            HandleTouch();
 
-            // TODO: Add your update logic here
+            if (gameTime.TotalGameTime.Milliseconds % (60 * 50) == 0)
+            {
+                _snake.Grow();
 
+                if (_snake.Eats(_apple))
+                {
+                    ResetApple();
+                }
+                else
+                {
+                    _snake.Shrink();
+                }
+            }
             base.Update(gameTime);
         }
 
@@ -82,12 +90,93 @@ namespace SnakeGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
-
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Color.Gray);
+            DrawBackground();
             _snake.Draw(_spriteBatch);
-
+            _apple.Draw(_spriteBatch);
             base.Draw(gameTime);
+        }
+
+        private void ResetApple()
+        {
+            _apple = new Apple(RNG.Next(Columns) * Scale, RNG.Next(Rows) * Scale);
+            _apple.SetTexture(GraphicsDevice);
+        }
+
+        private void ResetSnake()
+        {
+            _snake = new Snake(0, 0);
+            _snake.SetTexture(GraphicsDevice);
+        }
+
+        private void ResetGame()
+        {
+            ResetApple();
+            ResetSnake();
+        }
+
+        private void DrawBackground()
+        {
+            _spriteBatch.Begin();
+
+            _backgroundTexture = new Texture2D(GraphicsDevice, GameArea.Width, GameArea.Height);
+            var data = new Color[_backgroundTexture.Width * _backgroundTexture.Height];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = Color.Black;
+            _backgroundTexture.SetData(data);
+            _spriteBatch.Draw(_backgroundTexture, GameArea, Color.Black);
+
+            _spriteBatch.End();
+        }
+
+        private void HandleTouch()
+        {
+            var touchCollection = TouchPanel.GetState();
+            var previousDirection = _snake.Direction;
+            var nextDirection = previousDirection;
+            var head = _snake[0];
+
+            foreach (var touchLocation in touchCollection)
+            {
+                if (touchLocation.State != TouchLocationState.Pressed)
+                    continue;
+
+                float x = touchLocation.Position.X;
+                float y = touchLocation.Position.Y;
+                bool aboveSnake = y < head.Y;
+                bool leftOfSnake = x < head.X;
+
+                if (aboveSnake && leftOfSnake)
+                {
+                    if (previousDirection.X == 0)
+                        nextDirection = new Vector2(-1, 0);
+                    else
+                        nextDirection = new Vector2(0, -1);
+                }
+                else if (aboveSnake && !leftOfSnake)
+                {
+                    if (previousDirection.X == 0)
+                        nextDirection = new Vector2(1, 0);
+                    else
+                        nextDirection = new Vector2(0, -1);
+                }
+                else if (!aboveSnake && leftOfSnake)
+                {
+                    if (previousDirection.X == 0)
+                        nextDirection = new Vector2(-1, 0);
+                    else
+                        nextDirection = new Vector2(0, 1);
+                }
+                else if (!aboveSnake && !leftOfSnake)
+                {
+                    if (previousDirection.X == 0)
+                        nextDirection = new Vector2(1, 0);
+                    else
+                        nextDirection = new Vector2(0, 1);
+                }
+                _snake.Direction = nextDirection;
+                return;
+            }
         }
     }
 }

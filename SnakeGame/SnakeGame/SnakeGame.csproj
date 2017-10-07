@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Apple.cs" />
     <Compile Include="Classes\Globals.cs" />
     <Compile Include="Classes\Snake.cs" />
     <Compile Include="MainActivity.cs" />

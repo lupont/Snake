@@ -24,6 +24,14 @@ namespace SnakeGame
         private Vector2 _direction;
         #endregion
 
+        #region Public properties
+        public Vector2 Direction
+        {
+            get => _direction;
+            set => SetDirection(value.X, value.Y);
+        } 
+        #endregion
+
         #region Public constructors
         public Snake(float x, float y)
         {
@@ -32,11 +40,30 @@ namespace SnakeGame
         }
         #endregion
 
-        #region Private methods
-
+        #region Public indexers
+        public Vector2 this[int index] => _body[index];
         #endregion
 
         #region Public methods
+        public void Grow()
+        {
+            var head = _body[0];
+            _body.Insert(0, head + _direction);
+        }
+
+        public void Shrink()
+        {
+            if (_body.Count == 0)
+                return;
+            _body.RemoveAt(_body.Count - 1);
+        }
+
+        public bool Eats(Apple apple)
+        {
+            var head = _body[0];
+            return head.X == apple.Position.X && head.Y == apple.Position.Y;
+        }
+
         public void SetTexture(GraphicsDevice graphicsDevice)
         {
             _texture = new Texture2D(graphicsDevice, Scale, Scale);
@@ -56,7 +83,10 @@ namespace SnakeGame
             spriteBatch.Begin();
 
             foreach (var part in _body)
-                spriteBatch.Draw(_texture, part, Color.White);
+            {
+                var color = _body.IndexOf(part) == 0 ? Color.LightGreen : Color.Green;
+                spriteBatch.Draw(_texture, part, color);
+            }
 
             spriteBatch.End();
         }
