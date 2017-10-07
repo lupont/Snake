@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -31,7 +32,15 @@ namespace SnakeGame
         #endregion
 
         #region Public indexers
-        public Vector2 this[int index] => _body[index];
+        public Vector2 this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _body.Count)
+                    throw new IndexOutOfRangeException("Attempted to get part of snake outside of bounds.");
+                return _body[index];
+            }
+        }
         #endregion
 
         #region Private methods
