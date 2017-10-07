@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -44,6 +34,13 @@ namespace SnakeGame
         public Vector2 this[int index] => _body[index];
         #endregion
 
+        #region Private methods
+        public void SetDirection(float dx, float dy)
+        {
+            _direction = new Vector2(dx * Scale, dy * Scale);
+        }
+        #endregion
+
         #region Public methods
         public void Grow()
         {
@@ -71,11 +68,6 @@ namespace SnakeGame
             for (int i = 0; i < data.Length; i++)
                 data[i] = Color.Green;
             _texture.SetData(data);
-        }
-
-        public void SetDirection(float dx, float dy)
-        {
-            _direction = new Vector2(dx * Scale, dy * Scale);
         }
 
         public void Draw(SpriteBatch spriteBatch)

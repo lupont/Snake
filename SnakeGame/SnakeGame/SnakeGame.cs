@@ -1,23 +1,22 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 
 using static SnakeGame.Globals;
 
 namespace SnakeGame
 {
-    /// <summary>
-    /// This is the main type for your game.
-    /// </summary>
     public class SnakeGame : Game
     {
+        #region Private fields
         private GraphicsDeviceManager _graphics;
-        private SpriteBatch           _spriteBatch;
-        private Texture2D             _backgroundTexture;
-        private Snake                 _snake;
-        private Apple                 _apple;
+        private SpriteBatch _spriteBatch;
+        private Texture2D _backgroundTexture;
+        private Snake _snake;
+        private Apple _apple;
+        #endregion
 
+        #region Public constructors
         public SnakeGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -28,7 +27,9 @@ namespace SnakeGame
             _graphics.PreferredBackBufferHeight = Height;
             _graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
         }
+        #endregion
 
+        #region Initialization
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
         /// This is where it can query for any required services and load any non-graphic
@@ -39,8 +40,10 @@ namespace SnakeGame
         {
             ResetGame();
             base.Initialize();
-        }
+        } 
+        #endregion
 
+        #region Content loading/unloading
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
@@ -49,21 +52,9 @@ namespace SnakeGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
         }
+        #endregion
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-
-        }
-
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        #region Game loop
         protected override void Update(GameTime gameTime)
         {
             HandleTouch();
@@ -83,20 +74,18 @@ namespace SnakeGame
             }
             base.Update(gameTime);
         }
-
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Gray);
+            GraphicsDevice.Clear(Color.DarkGray);
             DrawBackground();
             _snake.Draw(_spriteBatch);
             _apple.Draw(_spriteBatch);
             base.Draw(gameTime);
         }
+        #endregion
 
+        #region Reset-methods
         private void ResetApple()
         {
             _apple = new Apple(RNG.Next(Columns) * Scale, RNG.Next(Rows) * Scale);
@@ -114,7 +103,9 @@ namespace SnakeGame
             ResetApple();
             ResetSnake();
         }
+        #endregion
 
+        #region Private miscellaneous methods
         private void DrawBackground()
         {
             _spriteBatch.Begin();
@@ -177,6 +168,7 @@ namespace SnakeGame
                 _snake.Direction = nextDirection;
                 return;
             }
-        }
+        } 
+        #endregion
     }
 }
